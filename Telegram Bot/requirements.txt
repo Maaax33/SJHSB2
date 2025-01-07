@@ -1,0 +1,4 @@
+pyTelegramBotAPI
+python-whois
+python-dotenv
+requests 
