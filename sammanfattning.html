@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ekonomisk Statistik II – Sammanfattning VT 2026</title>
+<style>
+  :root {
+    --blue-dark: #1F3864;
+    --blue-mid: #2E75B6;
+    --blue-light: #d6e4f7;
+    --green-light: #e2efda;
+    --yellow-light: #fff2cc;
+    --orange-light: #fce4d6;
+    --gray-bg: #f7f9fc;
+    --text: #1a1a2e;
+    --text-muted: #555;
+    --card-shadow: 0 2px 12px rgba(46,117,182,0.10);
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--gray-bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  /* ── HEADER ─────────────────────────────── */
+  header {
+    background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-mid) 100%);
+    color: white;
+    padding: 48px 24px 36px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  header h1 { font-size: clamp(1.6rem, 4vw, 2.6rem); font-weight: 800; letter-spacing: -0.5px; position: relative; }
+  header p.subtitle { font-size: 1.05rem; opacity: 0.85; margin-top: 8px; position: relative; }
+  header .badge {
+    display: inline-block; margin-top: 16px;
+    background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
+    padding: 5px 16px; border-radius: 20px; font-size: 0.85rem; position: relative;
+  }
+
+  /* ── SEARCH ──────────────────────────────── */
+  .search-wrap {
+    max-width: 640px; margin: -22px auto 0; padding: 0 16px; position: relative; z-index: 10;
+  }
+  .search-wrap input {
+    width: 100%; padding: 14px 20px 14px 48px;
+    border: none; border-radius: 50px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    font-size: 1rem; background: white; color: var(--text);
+    outline: none; transition: box-shadow 0.2s;
+  }
+  .search-wrap input:focus { box-shadow: 0 4px 20px rgba(46,117,182,0.35); }
+  .search-wrap .search-icon {
+    position: absolute; left: 32px; top: 50%; transform: translateY(-50%);
+    color: var(--blue-mid); font-size: 1.1rem; pointer-events: none;
+  }
+
+  /* ── LAYOUT ──────────────────────────────── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  .nav-pills {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin: 36px 0 32px; justify-content: center;
+  }
+  .nav-pills button {
+    padding: 7px 16px; border-radius: 20px; border: 2px solid var(--blue-mid);
+    background: white; color: var(--blue-mid); cursor: pointer;
+    font-size: 0.85rem; font-weight: 600; transition: all 0.18s;
+  }
+  .nav-pills button:hover, .nav-pills button.active {
+    background: var(--blue-mid); color: white;
+  }
+
+  /* ── SECTION CARDS ───────────────────────── */
+  .section {
+    background: white; border-radius: var(--radius);
+    box-shadow: var(--card-shadow); margin-bottom: 28px;
+    overflow: hidden; transition: box-shadow 0.2s;
+  }
+  .section:hover { box-shadow: 0 4px 24px rgba(46,117,182,0.18); }
+
+  .section-header {
+    background: linear-gradient(135deg, var(--blue-dark), var(--blue-mid));
+    color: white; padding: 20px 28px;
+    display: flex; align-items: center; gap: 14px; cursor: pointer;
+    user-select: none;
+  }
+  .section-header .icon { font-size: 1.6rem; }
+  .section-header h2 { font-size: 1.2rem; font-weight: 700; flex: 1; }
+  .section-header .toggle {
+    font-size: 1.2rem; transition: transform 0.25s; line-height: 1;
+  }
+  .section.open .section-header .toggle { transform: rotate(180deg); }
+
+  .section-body {
+    padding: 0; max-height: 0; overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.3s;
+  }
+  .section.open .section-body { max-height: 9999px; padding: 28px; }
+
+  /* ── SUB-HEADINGS ─────────────────────────── */
+  .section-body h3 {
+    font-size: 1.05rem; font-weight: 700; color: var(--blue-dark);
+    margin: 24px 0 10px; padding-bottom: 6px;
+    border-bottom: 2px solid var(--blue-light);
+  }
+  .section-body h3:first-child { margin-top: 0; }
+  .section-body h4 {
+    font-size: 0.95rem; font-weight: 700; color: var(--blue-mid);
+    margin: 18px 0 8px;
+  }
+  .section-body p { margin-bottom: 12px; font-size: 0.97rem; color: var(--text); }
+
+  /* ── CALLOUT BOXES ───────────────────────── */
+  .box {
+    border-radius: 8px; padding: 14px 18px; margin: 14px 0;
+    font-size: 0.95rem; border-left: 4px solid;
+  }
+  .box.yellow { background: var(--yellow-light); border-color: #f0c419; }
+  .box.green  { background: var(--green-light);  border-color: #70ad47; }
+  .box.blue   { background: var(--blue-light);   border-color: var(--blue-mid); }
+  .box.orange { background: var(--orange-light); border-color: #ed7d31; }
+  .box .box-label {
+    font-weight: 700; font-size: 0.78rem; text-transform: uppercase;
+    letter-spacing: 0.5px; opacity: 0.65; margin-bottom: 4px;
+  }
+
+  /* ── FORMULA ──────────────────────────────── */
+  .formula {
+    background: var(--blue-dark); color: #e8f4ff;
+    font-family: 'Courier New', monospace; font-size: 0.97rem;
+    padding: 13px 20px; border-radius: 8px; margin: 12px 0;
+    overflow-x: auto; white-space: nowrap;
+  }
+
+  /* ── TABLE ───────────────────────────────── */
+  .data-table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.92rem; }
+  .data-table th {
+    background: var(--blue-mid); color: white;
+    padding: 10px 14px; text-align: left; font-weight: 600;
+  }
+  .data-table td { padding: 9px 14px; border-bottom: 1px solid #e8eef5; }
+  .data-table tr:nth-child(even) td { background: var(--gray-bg); }
+  .data-table tr:hover td { background: var(--blue-light); }
+
+  /* ── BULLETS ─────────────────────────────── */
+  ul.bullets { padding-left: 20px; margin: 8px 0 14px; }
+  ul.bullets li { margin-bottom: 7px; font-size: 0.97rem; }
+  ul.bullets li::marker { color: var(--blue-mid); }
+
+  /* ── STEP LIST ───────────────────────────── */
+  ol.steps { padding-left: 22px; margin: 8px 0 14px; }
+  ol.steps li { margin-bottom: 8px; font-size: 0.97rem; padding-left: 4px; }
+  ol.steps li::marker { color: var(--blue-mid); font-weight: 700; }
+
+  /* ── GRID ────────────────────────────────── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+  .mini-card {
+    background: var(--gray-bg); border-radius: 8px; padding: 14px 16px;
+    border: 1px solid #dde6f0;
+  }
+  .mini-card strong { display: block; color: var(--blue-dark); margin-bottom: 4px; font-size: 0.88rem; text-transform: uppercase; letter-spacing: 0.3px; }
+
+  /* ── FORMELBLAD (sista sektion) ──────────── */
+  .formula-sheet { column-count: 2; column-gap: 24px; }
+  @media (max-width: 640px) { .formula-sheet { column-count: 1; } }
+  .formula-sheet .fs-block { break-inside: avoid; margin-bottom: 18px; }
+  .formula-sheet .fs-title { font-weight: 700; color: var(--blue-dark); font-size: 0.9rem; margin-bottom: 6px; }
+  .formula-sheet .formula { font-size: 0.88rem; padding: 9px 14px; white-space: normal; }
+
+  /* ── HIGHLIGHT (search) ───────────────────── */
+  mark { background: #ffe066; border-radius: 3px; padding: 0 2px; }
+
+  /* ── FOOTER ──────────────────────────────── */
+  footer { text-align: center; padding: 32px; color: var(--text-muted); font-size: 0.85rem; }
+
+  /* ── PROGRESS BAR ────────────────────────── */
+  .progress-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 3px; z-index: 1000; }
+  .progress-bar { height: 3px; background: #5bc0f8; width: 0; transition: width 0.1s; }
+
+  /* ── SCROLL TO TOP ───────────────────────── */
+  #scrollTop {
+    position: fixed; bottom: 28px; right: 28px;
+    background: var(--blue-mid); color: white;
+    border: none; border-radius: 50%; width: 44px; height: 44px;
+    font-size: 1.2rem; cursor: pointer; box-shadow: 0 3px 12px rgba(0,0,0,0.2);
+    opacity: 0; transition: opacity 0.3s; pointer-events: none;
+  }
+  #scrollTop.visible { opacity: 1; pointer-events: all; }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+
+<header>
+  <h1>📊 Ekonomisk Statistik II</h1>
+  <p class="subtitle">Sammanfattning · VT 2026 · Enkla förklaringar med fokus på intuition</p>
+  <span class="badge">1ST861 · Föreläsning 1, 2, 3, 4a, 4b, 6, 7 &amp; 8</span>
+</header>
+
+<div class="search-wrap">
+  <span class="search-icon">🔍</span>
+  <input type="text" id="searchInput" placeholder="Sök ämne, formel eller begrepp..." autocomplete="off">
+</div>
+
+<div class="container">
+
+  <div class="nav-pills" id="navPills">
+    <button class="active" data-filter="all">Allt</button>
+    <button data-filter="chi">Chi-kvadrat</button>
+    <button data-filter="reg">Regression</button>
+    <button data-filter="multi">Multipel reg.</button>
+    <button data-filter="kol">Multikolinjäritet</button>
+    <button data-filter="mod">Modellantaganden</button>
+    <button data-filter="urval">Urval</button>
+    <button data-filter="tid">Tidsserier</button>
+    <button data-filter="index">Index</button>
+    <button data-filter="np">Icke-parametriskt</button>
+    <button data-filter="formel">📋 Formelblad</button>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       DEL 1: CHI-KVADRAT
+  ════════════════════════════════════════════ -->
+  <div class="section open" data-tags="chi">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="icon">🎲</span>
+      <h2>Del 1 – Chi-kvadrat-tester <small style="font-weight:400;opacity:.8">(Föreläsning 1)</small></h2>
+      <span class="toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <h3>Vad är chi-kvadratfördelningen?</h3>
+      <p>Tänk dig att du kvadrerar ett slumpmässigt tal från en normalfördelning – resultatet är alltid positivt och bildar en skev kurva. Det är chi-kvadratfördelningen. <strong>Frihetsgrader (df)</strong> styr formen: få df = kraftigt skev, många df = mer symmetrisk.</p>
+      <div class="box blue">
+        <div class="box-label">💡 Intuition</div>
+        Chi-kvadrat används när vi vill jämföra <em>observerade</em> med <em>förväntade</em> frekvenser – stämmer vad vi ser med vad vi förväntar oss?
+      </div>
+
+      <h3>1.1 Anpassningstest (Goodness-of-Fit)</h3>
+      <p><strong>Fråga:</strong> Stämmer datan med en förväntad fördelning? T.ex. – är en tärning rättvis?</p>
+      <ol class="steps">
+        <li>Ange förväntade proportioner under H₀ (t.ex. lika stor sannolikhet för varje kategori)</li>
+        <li>Räkna förväntad frekvens: <strong>E_i = n · p₀_i</strong></li>
+        <li>Beräkna teststorheten: χ² = Σ (O_i − E_i)² / E_i</li>
+        <li>Jämför med kritiskt värde, df = k − 1 (k = antal kategorier)</li>
+        <li>χ² > kritiskt värde → förkasta H₀</li>
+      </ol>
+      <div class="formula">χ² = Σ (O_i − E_i)² / E_i     df = k − 1</div>
+      <div class="box yellow">
+        <div class="box-label">⚠️ Tumregel</div>
+        Varje cell bör ha minst <strong>5 förväntade observationer</strong> för ett tillförlitligt test.
+      </div>
+
+      <h3>1.2 Oberoende-test med korstabell</h3>
+      <p><strong>Fråga:</strong> Finns det ett samband mellan två kategoriska variabler? (T.ex. kön och partisympati)</p>
+      <ol class="steps">
+        <li>Bygg en korstabell (r rader × c kolumner)</li>
+        <li>Beräkna förväntad frekvens: <strong>E_ij = (Radsumma_i × Kolumnsumma_j) / n</strong></li>
+        <li>Beräkna χ² = Σ (O_ij − E_ij)² / E_ij</li>
+        <li>df = (r − 1)(c − 1)</li>
+        <li>Förkasta H₀ om χ² > χ²_(α, df)</li>
+      </ol>
+      <div class="formula">χ² = Σ (O_ij − E_ij)² / E_ij     df = (r−1)(c−1)     E_ij = R_i · C_j / n</div>
+      <div class="box green">
+        <div class="box-label">✅ Nyckelpoäng</div>
+        H₀ = variablerna är oberoende. Stort χ² = observerade och förväntade frekvenser skiljer sig mycket = det finns ett samband.
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       DEL 2: KORRELATION & ENKEL REGRESSION
+  ════════════════════════════════════════════ -->
+  <div class="section" data-tags="reg">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="icon">📈</span>
+      <h2>Del 2 – Korrelation &amp; Enkel Regression <small style="font-weight:400;opacity:.8">(Föreläsning 2)</small></h2>
+      <span class="toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <h3>2.1 Pearsons korrelationskoefficient (r)</h3>
+      <p>Mäter styrka och riktning på det linjära sambandet mellan X och Y. Alltid mellan −1 och +1.</p>
+      <table class="data-table">
+        <tr><th>Värde på r</th><th>Tolkning</th></tr>
+        <tr><td>r nära +1</td><td>Starkt positivt samband (X ökar → Y ökar)</td></tr>
+        <tr><td>r nära −1</td><td>Starkt negativt samband (X ökar → Y minskar)</td></tr>
+        <tr><td>r nära 0</td><td>Svagt eller inget linjärt samband</td></tr>
+      </table>
+      <div class="box orange">
+        <div class="box-label">⚠️ Varning</div>
+        Korrelation ≠ kausalitet. Att två saker samvarierar betyder INTE att den ena orsakar den andra!
+      </div>
+
+      <h3>2.2 Enkel linjär regression (OLS)</h3>
+      <p>Vi vill <em>förutsäga</em> Y med hjälp av X. Regressionslinjen minimerar summan av kvadrerade avvikelser (residualer).</p>
+      <div class="formula">Ŷ = b₀ + b₁·X     b₁ = Sxy/Sxx     b₀ = ȳ − b₁·x̄</div>
+      <div class="grid-2">
+        <div class="mini-card"><strong>b₀ (intercept)</strong>Var linjen skär Y-axeln när X = 0</div>
+        <div class="mini-card"><strong>b₁ (lutning)</strong>Hur mycket Y ändras när X ökar med 1</div>
+        <div class="mini-card"><strong>Residual = e</strong>Faktiskt Y minus förutsagt Ŷ</div>
+        <div class="mini-card"><strong>OLS-principen</strong>Minimerar Σe² (summan av kvadrerade residualer)</div>
+      </div>
+
+      <h4>R² – Determinationskoefficienten</h4>
+      <p>Visar hur stor andel av variationen i Y som förklaras av modellen.</p>
+      <div class="formula">R² = SSR / SST     (0 ≤ R² ≤ 1)</div>
+      <div class="box blue">
+        <div class="box-label">💡 Intuition</div>
+        R² = 0.80 → modellen förklarar 80% av variationen i Y. Som ett betyg: 0% = totalt misslyckad, 100% = perfekt.
+      </div>
+
+      <h4>Hypotestest för lutningen b₁</h4>
+      <p>H₀: b₁ = 0 (X har inget samband med Y) &nbsp;|&nbsp; H₁: b₁ ≠ 0</p>
+      <div class="formula">t = b₁ / s(b₁)     df = n − 2</div>
+      <p>|t| > t-kritiskt <em>eller</em> p-värde &lt; α → förkasta H₀ → sambandet är statistiskt signifikant.</p>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       DEL 3: MULTIPEL REGRESSION
+  ════════════════════════════════════════════ -->
+  <div class="section" data-tags="multi reg">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="icon">🔢</span>
+      <h2>Del 3 – Multipel Regressionsanalys <small style="font-weight:400;opacity:.8">(Föreläsning 3)</small></h2>
+      <span class="toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <h3>3.1 Modellen</h3>
+      <p>Samma princip som enkel regression – men nu med <em>flera</em> X-variabler.</p>
+      <div class="formula">Ŷ = b₀ + b₁·X₁ + b₂·X₂ + ... + bₖ·Xₖ</div>
+      <div class="box blue">
+        <div class="box-label">💡 Ceteris paribus</div>
+        Varje koefficient bᵢ visar effekten av Xᵢ på Y <strong>med alla andra variabler hållna konstanta</strong>.
+        T.ex: b₁ = 5 → Y ökar med 5 enheter om X₁ ökar med 1 och allt annat är oförändrat.
+      </div>
+
+      <h3>3.2 F-test – testar modellen som helhet</h3>
+      <p>H₀: b₁ = b₂ = ... = bₖ = 0 &nbsp;(ingen variabel förklarar Y)<br>H₁: minst en bᵢ ≠ 0</p>
+      <table class="data-table">
+        <tr><th>Källa</th><th>SS</th><th>df</th><th>MS</th></tr>
+        <tr><td>Regression</td><td>SSR</td><td>k</td><td>MSR = SSR/k</td></tr>
+        <tr><td>Residual (fel)</td><td>SSE</td><td>n−k−1</td><td>MSE = SSE/(n−k−1)</td></tr>
+        <tr><td><strong>Totalt</strong></td><td>SST</td><td>n−1</td><td></td></tr>
+      </table>
+      <div class="formula">F = MSR / MSE     (df₁ = k, df₂ = n−k−1)</div>
+      <p>Stort F → förkasta H₀ → modellen förklarar Y signifikant.</p>
+
+      <h3>3.3 Justerat R²</h3>
+      <p>Vanligt R² ökar alltid när vi lägger till variabler – även värdelösa. Justerat R² korrigerar för det.</p>
+      <div class="formula">Justerat R² = 1 − [(1−R²)(n−1)/(n−k−1)]</div>
+      <div class="box yellow">
+        <div class="box-label">📌 Regel</div>
+        Använd justerat R² när du <strong>jämför modeller med olika antal variabler</strong>.
+      </div>
+
+      <h3>3.4 Dummyvariabler</h3>
+      <p>Kategorivariabler (t.ex. kön, region) kodas som 0/1-variabler.</p>
+      <div class="box green">
+        <div class="box-label">✅ Exempel</div>
+        Lön = 350 + 5·(Erfarenhet) + 40·(KvinnaDummy)<br><br>
+        Kvinna med 3 år: 350 + 5·3 + 40·1 = <strong>405</strong><br>
+        Man med 3 år: 350 + 5·3 + 40·0 = <strong>365</strong><br><br>
+        Dummykoefficienten (40) = skillnad i Y mellan grupperna, allt annat lika.
+      </div>
+      <p><strong>Viktigt:</strong> Med k kategorier, skapa k−1 dummyvariabler (undvik dummyfällan).</p>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       DEL 4A: MULTIKOLINJÄRITET
+  ════════════════════════════════════════════ -->
+  <div class="section" data-tags="kol">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="icon">🔗</span>
+      <h2>Del 4a – Multikolinjäritet <small style="font-weight:400;opacity:.8">(Föreläsning 4a)</small></h2>
+      <span class="toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <h3>Vad är det?</h3>
+      <p>Uppstår när X-variablerna är starkt korrelerade med varandra.</p>
+      <div class="box blue">
+        <div class="box-label">💡 Intuition</div>
+        Tänk dig att du förklarar längd med både skostorlek och handens längd – de mäter nästan samma sak. Modellen vet inte vilket bidrag som tillhör vilken variabel.
+      </div>
+
+      <h3>Varför är det ett problem?</h3>
+      <ul class="bullets">
+        <li>Koefficienterna (bᵢ) blir instabila och svårtolkade</li>
+        <li>Standardfelen för bᵢ ökar → t-testerna tappar styrka</li>
+        <li>Svårt att avgöra vilken variabel som "egentligen" påverkar Y</li>
+      </ul>
+
+      <h3>VIF – Variance Inflation Factor</h3>
+      <div class="formula">VIF_j = 1 / (1 − R²_j)     (R²_j = R² från regression av Xj mot övriga X)</div>
+      <table class="data-table">
+        <tr><th>VIF-värde</th><th>Tolkning</th></tr>
+        <tr><td>VIF = 1</td><td>Ingen multikolinjäritet</td></tr>
+        <tr><td>VIF 1–5</td><td>Måttlig, ofta acceptabelt</td></tr>
+        <tr><td>VIF 5–10</td><td>Hög, problem börjar uppstå</td></tr>
+        <tr><td>VIF > 10</td><td>Allvarlig – åtgärd krävs</td></tr>
+      </table>
+
+      <h3>Vad gör man?</h3>
+      <ul class="bullets">
+        <li>Ta bort en av de korrelerade variablerna</li>
+        <li>Kombinera variabler (t.ex. skapa ett index)</li>
+        <li>Samla in mer data</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       DEL 4B: MODELLANTAGANDEN
+  ════════════════════════════════════════════ -->
+  <div class="section" data-tags="mod">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="icon">🔬</span>
+      <h2>Del 4b – Modellantaganden &amp; Diagnostik <small style="font-weight:400;opacity:.8">(Föreläsning 4b)</small></h2>
+      <span class="toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <h3>De fyra antagandena</h3>
+      <table class="data-table">
+        <tr><th>#</th><th>Antagande</th><th>Vad det innebär</th></tr>
+        <tr><td>1</td><td>Noll medelvärde</td><td>E(eᵢ) = 0 – residualerna har i genomsnitt värdet noll</td></tr>
+        <tr><td>2</td><td>Homoskedasticitet</td><td>Konstant varians – residualernas spridning är lika stor för alla X</td></tr>
+        <tr><td>3</td><td>Oberoende residualer</td><td>Ingen autokorrelation – eᵢ och eⱼ är ej korrelerade</td></tr>
+        <tr><td>4</td><td>Normalfördelade residualer</td><td>eᵢ ~ N(0, σ²)</td></tr>
+      </table>
+
+      <h3>Hur kontrollerar man?</h3>
+      <div class="grid-2">
+        <div class="mini-card">
+          <strong>Antagande 2 – Homoskedasticitet</strong>
+          Rita residualplot (e mot Ŷ). Jämn spridning kring noll = OK. Trattform = heteroskedasticitet = problem.
+        </div>
+        <div class="mini-card">
+          <strong>Antagande 3 – Autokorrelation</strong>
+          Kolla residualer mot tid. Finns ett mönster? Durbin-Watson test används formellt.
+        </div>
+        <div class="mini-card">
+          <strong>Antagande 4 – Normalitet</strong>
+          Rita histogram av residualer (klockformat?) eller PP-diagram (punkter längs diagonal = OK).
+        </div>
+        <div class="mini-card">
+          <strong>Allmänt</strong>
+          Om residualplot mot Ŷ visar ett mönster (kurva, tratt) är ett antagande brutet.
+        </div>
+      </div>
+
+      <h3>Linjär vs. Kurvilinjär modell</h3>
+      <table class="data-table">
+        <tr><th>Modell</th><th>Formel</th><th>När?</th></tr>
+        <tr><td>Linjär</td><td>Y = b₀ + b₁·X</td><td>Rakt samband i spridningsdiagram</td></tr>
+        <tr><td>Andragrads (kurvilinjär)</td><td>Y = b₀ + b₁·X + b₂·X²</td><td>Böjt samband – lägg till X² som variabel</td></tr>
+      </table>
+      <div class="box orange">
+        <div class="box-label">⚠️ Kom ihåg</div>
+        Residualanalys är nyckeln: mönster i residualerna = modellantagande brutet = förbättra modellen.
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       DEL 6: URVALSUNDERSÖKNING
+  ════════════════════════════════════════════ -->
+  <div class="section" data-tags="urval">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="icon">🎯</span>
+      <h2>Del 6 – Urvalsundersökning <small style="font-weight:400;opacity:.8">(Föreläsning 6)</small></h2>
+      <span class="toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <h3>Urvalsmetoder</h3>
+      <table class="data-table">
+        <tr><th>Metod</th><th>Hur det fungerar</th></tr>
+        <tr><td>Obundet slumpmässigt</td><td>Varje enhet lika stor chans – som att dra lotter</td></tr>
+        <tr><td>Systematiskt</td><td>Välj var k:te enhet (k = N/n)</td></tr>
+        <tr><td>Stratifierat</td><td>Dela i grupper, ta urval från varje grupp</td></tr>
+        <tr><td>Kluster</td><td>Dela i kluster, välj kluster, undersök alla i dessa</td></tr>
+      </table>
+
+      <h3>Obundet slumpmässigt urval</h3>
+      <div class="formula">Estimat av medelvärde: x̄     Estimat av total: τ̂ = N · x̄</div>
+      <div class="formula">s_x̄ = √[ (1/N²) · N(N−n) · s²/n ]     (ändlig pop.)</div>
+      <div class="formula">95% KI för medelvärde: x̄ ± 2 · s_x̄</div>
+      <div class="formula">95% KI för proportion: p ± 2 · s_p     s_p = √[ (1/N²)·N(N−n)·p(1−p)/n ]</div>
+
+      <h3>Stratifierat slumpmässigt urval</h3>
+      <p>Populationen delas i H strata. Nᵢ = populationsstorlek i stratum i, nᵢ = urvalsstorlek.</p>
+      <div class="box blue">
+        <div class="box-label">💡 Varför stratifiera?</div>
+        Ger mer precisa skattningar – vi säkerställer representation från varje grupp, speciellt om grupperna är väldigt olika.
+      </div>
+
+      <h4>Medelvärde</h4>
+      <div class="formula">x̄_st = Σ (Nᵢ/N) · x̄ᵢ</div>
+      <div class="formula">s_{x̄_st} = √[ (1/N²) · Σ Nᵢ(Nᵢ−nᵢ) · sᵢ²/nᵢ ]</div>
+      <div class="formula">95% KI: x̄_st ± 2 · s_{x̄_st}</div>
+
+      <h4>Total</h4>
+      <div class="formula">τ̂_st = N · x̄_st</div>
+      <div class="formula">95% KI: N · x̄_st ± 2 · N · s_{x̄_st}</div>
+
+      <h4>Proportion</h4>
+      <div class="formula">p_st = Σ (Nᵢ/N) · pᵢ</div>
+      <div class="formula">s_{p_st} = √[ (1/N²) · Σ Nᵢ(Nᵢ−nᵢ) · pᵢ(1−pᵢ)/nᵢ ]</div>
+      <div class="formula">95% KI: p_st ± 2 · s_{p_st}</div>
+
+      <div class="box green">
+        <div class="box-label">✅ Exempel – ChemTech (475 anst., 3 åldersgrupper)</div>
+        x̄_st = (100/475)·250 + (250/475)·400 + (125/475)·425 = <strong>375 kr</strong><br>
+        s_{x̄_st} = 9.27 → 95% KI: 375 ± 2·9.27 = <strong>[356.46, 393.54]</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       DEL 7: TIDSSERIER & PROGNOSER
+  ════════════════════════════════════════════ -->
+  <div class="section" data-tags="tid">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="icon">📅</span>
+      <h2>Del 7 – Tidsserier &amp; Prognoser <small style="font-weight:400;opacity:.8">(Föreläsning 7)</small></h2>
+      <span class="toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <h3>Tidsseriernas fyra komponenter</h3>
+      <table class="data-table">
+        <tr><th>Komponent</th><th>Vad det är</th></tr>
+        <tr><td><strong>T – Trend</strong></td><td>Långsiktig rörelse uppåt eller nedåt</td></tr>
+        <tr><td><strong>C – Cyklisk</strong></td><td>Svängningar kring trend (konjunkturcykler, flertåriga)</td></tr>
+        <tr><td><strong>S – Säsong</strong></td><td>Regelbundet mönster inom ett år (mer glass på sommaren!)</td></tr>
+        <tr><td><strong>I – Oregelbunden</strong></td><td>Slumpmässig brus som inte kan förklaras</td></tr>
+      </table>
+
+      <h3>Prognosnoggrannhet</h3>
+      <div class="formula">ME  = Σ(Yₜ − Fₜ) / n          (opartisk om ≈ 0)</div>
+      <div class="formula">MAD = Σ|Yₜ − Fₜ| / n          (genomsnittlig absolut avvikelse)</div>
+      <div class="formula">MSE = Σ(Yₜ − Fₜ)² / n         (straffar stora fel hårdare)</div>
+
+      <h3>Glidande medelvärde</h3>
+      <div class="formula">F_{t+1} = (Yₜ + Yₜ₋₁ + ... + Yₜ₋ₖ₊₁) / k</div>
+      <p>Stort k → mjuk kurva, trög reaktion. Litet k → känsligt, mer brus.</p>
+
+      <h3>Exponentiell utjämning</h3>
+      <div class="formula">F_{t+1} = α·Yₜ + (1−α)·Fₜ     (0 &lt; α &lt; 1)</div>
+      <div class="grid-2">
+        <div class="mini-card"><strong>α nära 1 (t.ex. 0.8)</strong>Reagerar snabbt – följer data tätt. Liten "minne".</div>
+        <div class="mini-card"><strong>α nära 0 (t.ex. 0.1)</strong>Jämnar ut kraftigt – mjuk, trög kurva. Stort "minne".</div>
+      </div>
+      <div class="box blue">
+        <div class="box-label">💡 Intuition</div>
+        α = 0.8 = en person som nästan bara lyssnar på den senaste nyheten.<br>
+        α = 0.1 = en person som inte ändrar uppfattning lätt.
+      </div>
+      <p><strong>Startvillkor:</strong> F₁ = Y₁ &nbsp;|&nbsp; <strong>Välj α:</strong> minimera MSE</p>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       DEL 7: INDEX
+  ════════════════════════════════════════════ -->
+  <div class="section" data-tags="index tid">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="icon">📊</span>
+      <h2>Del 7 (forts.) – Indextal <small style="font-weight:400;opacity:.8">(Föreläsning 7)</small></h2>
+      <span class="toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <h3>Enkelt prisindex</h3>
+      <p>Uttrycker varje värde i förhållande till ett basår (= 100).</p>
+      <div class="formula">Indexvärde(t) = 100 × (Faktiskt värde år t) / (Värde basår)</div>
+      <div class="box green">
+        <div class="box-label">✅ Exempel</div>
+        Index 1992 = 139.6 med basår 1988 → priset stigit med 39.6% sedan 1988.
+      </div>
+
+      <h4>Jämföra två perioder (inte mot basåret)</h4>
+      <div class="formula">Prisförändring (t₁→t₂) = 100 × (Index_t₂ / Index_t₁)</div>
+      <p>Under 100 = pris sjunkit. Över 100 = pris stigit.</p>
+
+      <h4>Byta basår</h4>
+      <p>Dela hela serien med indexvärdet vid det nya basåret och multiplicera med 100. Viktigt: val av basår kan missbrukas för att skapa önskad bild!</p>
+
+      <h3>Aggregerade prisindex</h3>
+      <div class="formula">Oviktat: Iₜ = 100 × (ΣPᵢₜ) / (ΣPᵢ₀)</div>
+      <div class="formula">Viktat:  Iₜ = 100 × (ΣQᵢ·Pᵢₜ) / (ΣQᵢ·Pᵢ₀)</div>
+      <table class="data-table">
+        <tr><th>Indextyp</th><th>Vikter hämtas från</th><th>Bäst när</th></tr>
+        <tr><td><strong>Laspeyres</strong></td><td>Basårets kvantiteter (Qᵢ,₀)</td><td>Kvantiteter relativt stabila över tid</td></tr>
+        <tr><td><strong>Paasche</strong></td><td>Aktuell periods kvantiteter (Qᵢ,ₜ)</td><td>Kvantiteter förändras mycket</td></tr>
+      </table>
+
+      <h3>Inflationsmått i Sverige</h3>
+      <ul class="bullets">
+        <li><strong>KPI</strong> – Vanligaste måttet. SCB köper samma varukorg varje månad. Jan 2026: 0.5%</li>
+        <li><strong>KPIF</strong> – Riksbankens mål för penningpolitiken. Fast bolåneränta. Jan 2026: 2.0%</li>
+        <li><strong>HIKP</strong> – Harmoniserat EU-mått, möjliggör jämförelse mellan länder</li>
+        <li><strong>KPIF-XE</strong> – KPIF exklusive energi, mäter underliggande inflation</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       DEL 8: ICKE-PARAMETRISKA
+  ════════════════════════════════════════════ -->
+  <div class="section" data-tags="np">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="icon">🎴</span>
+      <h2>Del 8 – Icke-parametriska Metoder <small style="font-weight:400;opacity:.8">(Föreläsning 8)</small></h2>
+      <span class="toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <h3>Parametriskt vs. icke-parametriskt</h3>
+      <table class="data-table">
+        <tr><th></th><th>Parametriskt</th><th>Icke-parametriskt</th></tr>
+        <tr><td>Antaganden</td><td>Normalfördelning krävs</td><td>Inga fördelningsantaganden</td></tr>
+        <tr><td>Datatyp</td><td>Intervall/kvotskala</td><td>Ordinalskala OK</td></tr>
+        <tr><td>Nackdel</td><td>Känslig för extremvärden</td><td>Något lägre styrka</td></tr>
+        <tr><td>Används när</td><td>Antaganden uppfyllda</td><td>Litet urval, icke-normal data</td></tr>
+      </table>
+
+      <h3>8.1 Teckentest (Sign Test)</h3>
+      <p>Testar om medianen är ett visst värde. Räknar plustecken (obs &gt; m₀) vs. minustecken (obs &lt; m₀).</p>
+      <p><strong>Litet n (≤ 20):</strong> Använd binomialfördelning med p = 0.5</p>
+      <p><strong>Stort n (&gt; 20):</strong></p>
+      <div class="formula">z = (S − n/2) / √(n/4)     S = antal plustecken</div>
+      <div class="box yellow">
+        <div class="box-label">📌 OBS</div>
+        Om observation exakt = m₀ – exkludera den och minska n.
+      </div>
+
+      <h3>8.2 Wilcoxons teckenrangtest</h3>
+      <p>Mer kraftfullt än teckentest – tar hänsyn till <em>storleken</em> på skillnaderna, inte bara tecknet.</p>
+      <ol class="steps">
+        <li>Beräkna dᵢ = X₁ᵢ − X₂ᵢ (skillnad för varje par)</li>
+        <li>Ta bort nollor (dᵢ = 0), minska n</li>
+        <li>Rangordna |dᵢ| – minsta absoluta skillnad får rang 1</li>
+        <li>Sätt tillbaka tecknet: positiv/negativ rang</li>
+        <li>T = summan av alla rankade tecken</li>
+      </ol>
+      <p><strong>Stort n (&gt; 20):</strong></p>
+      <div class="formula">Z = T / σ_T     σ_T = √[ n(n+1)(2n+1) / 6 ]</div>
+      <div class="box blue">
+        <div class="box-label">💡 Intuition</div>
+        Wilcoxon rankar "hur stor" en skillnad är. En liten avvikelse bidrar lite, en stor avvikelse bidrar mycket till testets resultat.
+      </div>
+
+      <h3>8.3 Spearmans rangkorrelation</h3>
+      <p>Fungerar med ordinaldata (rankningar). Robust mot extremvärden.</p>
+      <ol class="steps">
+        <li>Rangordna X och Y separat (lägsta värde = rang 1)</li>
+        <li>Beräkna dᵢ = (rang i X) − (rang i Y)</li>
+        <li>Beräkna r_s:</li>
+      </ol>
+      <div class="formula">r_s = 1 − (6·Σdᵢ²) / (n(n²−1))</div>
+      <p>Tolkning: Samma som Pearson – nära ±1 = starkt samband, nära 0 = svagt.</p>
+      <div class="box green">
+        <div class="box-label">✅ Skillnad mot Pearson</div>
+        Spearman mäter om sambandet är <strong>monotont</strong> (konsekvent uppåt/nedåt) medan Pearson mäter om det är exakt linjärt.
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       FORMELBLAD
+  ════════════════════════════════════════════ -->
+  <div class="section" data-tags="formel">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="icon">📋</span>
+      <h2>Snabb Formelreferens</h2>
+      <span class="toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="formula-sheet">
+        <div class="fs-block">
+          <div class="fs-title">🎲 Chi-kvadrat</div>
+          <div class="formula">χ² = Σ (Oᵢ − Eᵢ)² / Eᵢ</div>
+          <div class="formula">Anpassning: df = k − 1</div>
+          <div class="formula">Oberoende: df = (r−1)(c−1)</div>
+          <div class="formula">Eᵢⱼ = Rᵢ · Cⱼ / n</div>
+        </div>
+        <div class="fs-block">
+          <div class="fs-title">📈 Enkel regression</div>
+          <div class="formula">Ŷ = b₀ + b₁X</div>
+          <div class="formula">b₁ = Sxy/Sxx  b₀ = ȳ − b₁x̄</div>
+          <div class="formula">R² = SSR/SST</div>
+          <div class="formula">t = b₁/s(b₁)  df = n−2</div>
+        </div>
+        <div class="fs-block">
+          <div class="fs-title">🔢 Multipel regression</div>
+          <div class="formula">F = MSR/MSE</div>
+          <div class="formula">df₁=k  df₂=n−k−1</div>
+          <div class="formula">Justerat R² = 1−[(1−R²)(n−1)/(n−k−1)]</div>
+          <div class="formula">VIF = 1/(1−R²_j)</div>
+        </div>
+        <div class="fs-block">
+          <div class="fs-title">🎯 Stratifierat urval</div>
+          <div class="formula">x̄_st = Σ(Nᵢ/N)·x̄ᵢ</div>
+          <div class="formula">s² = (1/N²)ΣNᵢ(Nᵢ−nᵢ)sᵢ²/nᵢ</div>
+          <div class="formula">τ̂ = N·x̄_st</div>
+          <div class="formula">p_st = Σ(Nᵢ/N)·pᵢ</div>
+        </div>
+        <div class="fs-block">
+          <div class="fs-title">📅 Tidsserier</div>
+          <div class="formula">F_{t+1} = α·Yₜ + (1−α)·Fₜ</div>
+          <div class="formula">MAD = Σ|Yₜ−Fₜ|/n</div>
+          <div class="formula">MSE = Σ(Yₜ−Fₜ)²/n</div>
+        </div>
+        <div class="fs-block">
+          <div class="fs-title">📊 Index</div>
+          <div class="formula">Iₜ = 100 · (värde_t/värde_basår)</div>
+          <div class="formula">Laspeyres: vikter från basår</div>
+          <div class="formula">Paasche: vikter från aktuell period</div>
+        </div>
+        <div class="fs-block">
+          <div class="fs-title">🎴 Icke-parametriskt</div>
+          <div class="formula">Teckentest: z = (S−n/2)/√(n/4)</div>
+          <div class="formula">Wilcoxon: σ_T = √[n(n+1)(2n+1)/6]</div>
+          <div class="formula">Spearman: r_s = 1 − 6Σd²/(n(n²−1))</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<footer>
+  <p>📚 Ekonomisk Statistik II · 1ST861 · VT 2026</p>
+</footer>
+
+<button id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+  // ── Toggle sections ───────────────────────────────────
+  function toggleSection(header) {
+    const section = header.closest('.section');
+    section.classList.toggle('open');
+  }
+
+  // ── Nav pills filter ──────────────────────────────────
+  document.querySelectorAll('.nav-pills button').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.nav-pills button').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      const filter = this.dataset.filter;
+      document.querySelectorAll('.section').forEach(sec => {
+        if (filter === 'all') {
+          sec.classList.remove('hidden');
+        } else {
+          const tags = (sec.dataset.tags || '').split(' ');
+          sec.classList.toggle('hidden', !tags.includes(filter));
+        }
+      });
+      // Expand visible sections when filter changes
+      if (filter !== 'all') {
+        document.querySelectorAll('.section:not(.hidden)').forEach(s => s.classList.add('open'));
+      }
+    });
+  });
+
+  // ── Search ────────────────────────────────────────────
+  const searchInput = document.getElementById('searchInput');
+  searchInput.addEventListener('input', function() {
+    const query = this.value.toLowerCase().trim();
+    // Activate "Allt" pill
+    document.querySelectorAll('.nav-pills button').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-filter="all"]').classList.add('active');
+    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('hidden'));
+
+    if (!query) {
+      // Remove all highlights
+      document.querySelectorAll('mark').forEach(m => {
+        m.outerHTML = m.innerHTML;
+      });
+      return;
+    }
+
+    document.querySelectorAll('.section').forEach(sec => {
+      const text = sec.textContent.toLowerCase();
+      if (text.includes(query)) {
+        sec.classList.remove('hidden');
+        sec.classList.add('open');
+      } else {
+        sec.classList.add('hidden');
+      }
+    });
+  });
+
+  // ── Progress bar ──────────────────────────────────────
+  window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY;
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = total > 0 ? (scrolled / total) * 100 : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+
+    const btn = document.getElementById('scrollTop');
+    if (scrolled > 400) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  });
+</script>
+</body>
+</html>

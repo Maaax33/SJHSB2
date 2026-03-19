@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flashcards – Ekonomisk Statistik II</title>
+<style>
+  :root {
+    --blue-dark: #1F3864;
+    --blue-mid: #2E75B6;
+    --blue-light: #d6e4f7;
+    --green: #70ad47;
+    --green-light: #e2efda;
+    --red: #c00000;
+    --red-light: #fce4d6;
+    --yellow: #fff2cc;
+    --gray: #f4f7fb;
+    --text: #1a1a2e;
+    --radius: 20px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--gray);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--blue-dark), var(--blue-mid));
+    color: white;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  header h1 { font-size: 1.15rem; font-weight: 700; }
+  header p  { font-size: 0.82rem; opacity: 0.8; }
+
+  /* ── CATEGORY FILTER ── */
+  .filters {
+    background: white;
+    padding: 14px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    border-bottom: 1px solid #dde6f0;
+  }
+  .filters button {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 2px solid var(--blue-mid);
+    background: white;
+    color: var(--blue-mid);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .filters button.active { background: var(--blue-mid); color: white; }
+
+  /* ── PROGRESS ── */
+  .progress-section {
+    max-width: 700px;
+    margin: 28px auto 0;
+    padding: 0 20px;
+    width: 100%;
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 8px;
+  }
+  .progress-bar-outer {
+    height: 8px;
+    background: #dde6f0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%;
+    background: var(--blue-mid);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+
+  /* ── CARD AREA ── */
+  .card-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 20px;
+  }
+
+  /* ── THE CARD ── */
+  .card-scene {
+    width: 100%;
+    max-width: 680px;
+    height: 360px;
+    perspective: 1200px;
+    cursor: pointer;
+  }
+  .card-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+  }
+  .card-scene.flipped .card-inner { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: var(--radius);
+    box-shadow: 0 8px 32px rgba(30,56,100,0.15);
+    display: flex;
+    flex-direction: column;
+    padding: 36px 40px;
+    overflow: hidden;
+  }
+  .card-front {
+    background: white;
+    border-top: 6px solid var(--blue-mid);
+  }
+  .card-back {
+    background: var(--blue-dark);
+    color: white;
+    transform: rotateY(180deg);
+    border-top: 6px solid #5bc0f8;
+  }
+
+  .card-category {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--blue-mid);
+    margin-bottom: 16px;
+  }
+  .card-back .card-category { color: #5bc0f8; }
+
+  .card-question {
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.5;
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+  .card-answer {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+  .card-answer .formula-text {
+    font-family: 'Courier New', monospace;
+    background: rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-top: 8px;
+    font-size: 0.97rem;
+    display: block;
+  }
+  .card-answer .answer-wrap { width: 100%; }
+
+  .card-hint {
+    font-size: 0.78rem;
+    opacity: 0.5;
+    text-align: center;
+    margin-top: 14px;
+  }
+  .card-back .card-hint { color: white; }
+
+  /* ── CONTROLS ── */
+  .controls {
+    max-width: 680px;
+    width: 100%;
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .know-btns {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    justify-content: center;
+  }
+  .btn-know {
+    flex: 1;
+    max-width: 200px;
+    padding: 14px 20px;
+    border-radius: 50px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-yes { background: var(--green); color: white; }
+  .btn-yes:hover { background: #5a9a35; transform: translateY(-2px); }
+  .btn-no  { background: var(--red); color: white; }
+  .btn-no:hover  { background: #a00000; transform: translateY(-2px); }
+  .btn-know:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+  .nav-btns {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .btn-nav {
+    padding: 10px 22px;
+    border-radius: 50px;
+    border: 2px solid var(--blue-mid);
+    background: white;
+    color: var(--blue-mid);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .btn-nav:hover { background: var(--blue-mid); color: white; }
+  .btn-shuffle {
+    padding: 10px 22px;
+    border-radius: 50px;
+    border: 2px solid #888;
+    background: white;
+    color: #555;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .btn-shuffle:hover { background: #555; color: white; }
+  .card-counter { font-size: 0.9rem; color: #666; font-weight: 600; }
+
+  /* ── SCORE BOARD ── */
+  .scoreboard {
+    display: flex;
+    gap: 20px;
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+  .score-item { display: flex; align-items: center; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-green { background: var(--green); }
+  .dot-red   { background: var(--red); }
+
+  /* ── FINISH SCREEN ── */
+  .finish-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 40px 20px;
+    max-width: 500px;
+    width: 100%;
+  }
+  .finish-screen.show { display: flex; }
+  .finish-emoji { font-size: 4rem; margin-bottom: 20px; }
+  .finish-screen h2 { font-size: 1.8rem; color: var(--blue-dark); margin-bottom: 10px; }
+  .finish-screen p { color: #555; margin-bottom: 24px; font-size: 1.05rem; }
+  .result-bars { width: 100%; margin: 20px 0; }
+  .result-bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; font-size: 0.9rem; }
+  .result-bar-label { width: 60px; text-align: right; color: #555; }
+  .result-bar-outer { flex: 1; height: 18px; background: #eee; border-radius: 9px; overflow: hidden; }
+  .result-bar-fill { height: 100%; border-radius: 9px; transition: width 0.8s ease; }
+  .result-bar-fill.green { background: var(--green); }
+  .result-bar-fill.red   { background: var(--red); }
+  .result-pct { width: 40px; font-weight: 700; }
+  .btn-restart {
+    padding: 14px 36px;
+    background: var(--blue-mid);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.15s;
+  }
+  .btn-restart:hover { background: var(--blue-dark); }
+  .btn-review {
+    padding: 10px 28px;
+    background: white;
+    color: var(--red);
+    border: 2px solid var(--red);
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.15s;
+  }
+  .btn-review:hover { background: var(--red); color: white; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🎴 Flashcards – Ekonomisk Statistik II</h1>
+    <p>Klicka på kortet för att vända det • Markera om du kan eller inte</p>
+  </div>
+  <div class="scoreboard">
+    <div class="score-item"><div class="dot dot-green"></div><span id="scoreGreen">0 kan</span></div>
+    <div class="score-item"><div class="dot dot-red"></div><span id="scoreRed">0 övar</span></div>
+  </div>
+</header>
+
+<div class="filters" id="categoryFilters"></div>
+
+<div class="progress-section">
+  <div class="progress-info">
+    <span id="progressText">Kort 1 av 40</span>
+    <span id="progressPct">0%</span>
+  </div>
+  <div class="progress-bar-outer">
+    <div class="progress-bar-inner" id="progressBar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="card-area">
+  <!-- MAIN CARD -->
+  <div class="card-scene" id="cardScene" onclick="flipCard()">
+    <div class="card-inner" id="cardInner">
+      <div class="card-face card-front">
+        <div class="card-category" id="cardCategory">Kategori</div>
+        <div class="card-question" id="cardQuestion">Fråga laddas...</div>
+        <div class="card-hint">👆 Klicka för att se svaret</div>
+      </div>
+      <div class="card-face card-back">
+        <div class="card-category" id="cardCategoryBack">Kategori</div>
+        <div class="card-answer" id="cardAnswer">Svar...</div>
+        <div class="card-hint">👆 Klicka för att vända tillbaka</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls" id="controls">
+    <div class="know-btns">
+      <button class="btn-know btn-no"  onclick="markCard(false)" id="btnNo">✗ Övar på detta</button>
+      <button class="btn-know btn-yes" onclick="markCard(true)"  id="btnYes">✓ Kan detta!</button>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-nav" onclick="prevCard()">← Föregående</button>
+      <span class="card-counter" id="cardCounter">1 / 40</span>
+      <button class="btn-nav" onclick="nextCard()">Nästa →</button>
+      <button class="btn-shuffle" onclick="shuffleCards()">🔀 Slumpa</button>
+    </div>
+  </div>
+
+  <!-- FINISH SCREEN -->
+  <div class="finish-screen" id="finishScreen">
+    <div class="finish-emoji" id="finishEmoji">🎉</div>
+    <h2 id="finishTitle">Färdig!</h2>
+    <p id="finishMsg"></p>
+    <div class="result-bars">
+      <div class="result-bar-row">
+        <div class="result-bar-label">Kan</div>
+        <div class="result-bar-outer"><div class="result-bar-fill green" id="barGreen" style="width:0%"></div></div>
+        <div class="result-pct green" id="pctGreen" style="color:var(--green)">0%</div>
+      </div>
+      <div class="result-bar-row">
+        <div class="result-bar-label">Övar</div>
+        <div class="result-bar-outer"><div class="result-bar-fill red" id="barRed" style="width:0%"></div></div>
+        <div class="result-pct" id="pctRed" style="color:var(--red)">0%</div>
+      </div>
+    </div>
+    <button class="btn-restart" onclick="restartAll()">🔄 Börja om (alla)</button>
+    <button class="btn-review" onclick="reviewWeak()" id="btnReview">📚 Öva bara på svaga</button>
+  </div>
+</div>
+
+<script>
+const ALL_CARDS = [
+  // ── CHI-KVADRAT ────────────────────────────────────────────────────────────
+  { cat: "Chi-kvadrat", q: "Vad mäter chi-kvadrattestet?", a: "Det jämför observerade frekvenser med förväntade frekvenser för att se om skillnaderna är större än vad slumpen kan förklara." },
+  { cat: "Chi-kvadrat", q: "Vad är formeln för chi-kvadrat-teststorheten?", a: "χ² = Σ (Oᵢ − Eᵢ)² / Eᵢ\nDär O = observerad frekvens, E = förväntad frekvens.", formula: true },
+  { cat: "Chi-kvadrat", q: "Vad är frihetsgrader (df) vid anpassningstest?", a: "df = k − 1\nDär k = antal kategorier.", formula: true },
+  { cat: "Chi-kvadrat", q: "Hur beräknas förväntad frekvens Eᵢ i anpassningstest?", a: "Eᵢ = n · p₀ᵢ\nDär n = stickprovsstorlek, p₀ᵢ = förväntad andel för kategori i.", formula: true },
+  { cat: "Chi-kvadrat", q: "Vad är frihetsgrader vid ett oberoende-test (korstabell)?", a: "df = (r − 1)(c − 1)\nDär r = antal rader, c = antal kolumner.", formula: true },
+  { cat: "Chi-kvadrat", q: "Hur beräknas förväntad frekvens Eᵢⱼ i en korstabell?", a: "Eᵢⱼ = (Radsumma_i × Kolumnsumma_j) / n\nDvs. produkten av marginalfrekvenserna delat med totalen.", formula: true },
+  { cat: "Chi-kvadrat", q: "Vad är nollhypotesen (H₀) i ett oberoende-test?", a: "H₀: De två variablerna är oberoende av varandra.\n(T.ex. kön och partisympati har inget samband.)" },
+  { cat: "Chi-kvadrat", q: "Vilken tumregel gäller för förväntade frekvenser?", a: "Varje cell bör ha minst 5 förväntade observationer för att chi-kvadrattestet ska vara tillförlitligt." },
+
+  // ── KORRELATION & ENKEL REGRESSION ────────────────────────────────────────
+  { cat: "Regression", q: "Vad mäter Pearsons korrelationskoefficient r?", a: "Styrkan och riktningen av det linjära sambandet mellan två variabler. r är alltid mellan −1 och +1." },
+  { cat: "Regression", q: "Vad innebär r = +0.9?", a: "Starkt positivt linjärt samband: när X ökar, ökar Y nästan lika konsekvent." },
+  { cat: "Regression", q: "Vad är regressionslinjen vid enkel linjär regression?", a: "Ŷ = b₀ + b₁·X\nDär b₀ = intercept (skärningspunkt Y-axel), b₁ = lutning.", formula: true },
+  { cat: "Regression", q: "Vad innebär OLS – minsta kvadratmetoden?", a: "Vi hittar den linje som minimerar summan av kvadrerade residualer: Σ(Yᵢ − Ŷᵢ)²" },
+  { cat: "Regression", q: "Vad är en residual?", a: "Residual = Yᵢ − Ŷᵢ\nSkillnaden mellan faktiskt värde och modellens förutsagna värde." },
+  { cat: "Regression", q: "Vad är formeln för R²?", a: "R² = SSR / SST\nVisar hur stor andel av variationen i Y som förklaras av modellen (0–1).", formula: true },
+  { cat: "Regression", q: "R² = 0.75 – vad betyder det?", a: "Modellen förklarar 75% av variationen i Y. 25% är oförklarad." },
+  { cat: "Regression", q: "Vilken teststorhet används för att testa b₁ = 0?", a: "t = b₁ / s(b₁)  med df = n − 2\nFörkasta H₀ om |t| > t-kritiskt eller p-värde < α.", formula: true },
+  { cat: "Regression", q: "Vad är H₀ och H₁ vid test av lutningskoefficienten?", a: "H₀: b₁ = 0 (X förklarar inte Y)\nH₁: b₁ ≠ 0 (det finns ett samband)" },
+
+  // ── MULTIPEL REGRESSION ────────────────────────────────────────────────────
+  { cat: "Multipel reg.", q: "Vad är ceteris paribus-tolkning?", a: "Koefficienten bᵢ visar effekten av Xᵢ på Y med alla andra variabler hållna konstanta." },
+  { cat: "Multipel reg.", q: "Vad testar F-testet i multipel regression?", a: "H₀: b₁ = b₂ = ... = bₖ = 0 (ingen variabel förklarar Y).\nStort F → förkasta H₀ → modellen förklarar Y signifikant." },
+  { cat: "Multipel reg.", q: "Vad är formeln för F-teststorheten?", a: "F = MSR / MSE\nDär MSR = SSR/k  och  MSE = SSE/(n−k−1)", formula: true },
+  { cat: "Multipel reg.", q: "Varför använder man justerat R² istället för vanligt R²?", a: "Vanligt R² ökar alltid när man lägger till variabler, även värdelösa. Justerat R² straffar för onödiga variabler och kan minska." },
+  { cat: "Multipel reg.", q: "Formel för justerat R²?", a: "Justerat R² = 1 − [(1−R²)(n−1)/(n−k−1)]", formula: true },
+  { cat: "Multipel reg.", q: "Vad är en dummyvariabel?", a: "En 0/1-variabel som kodar en kategori. T.ex. D = 1 om kvinna, D = 0 om man. Med k kategorier skapar man k−1 dummyvariabler." },
+  { cat: "Multipel reg.", q: "Vad är dummyfällan?", a: "Om man skapar k dummyvariabler för k kategorier uppstår perfekt multikolinjäritet. Man ska alltid ha k−1 dummyvariabler." },
+
+  // ── MULTIKOLINJÄRITET ─────────────────────────────────────────────────────
+  { cat: "Multikolinjäritet", q: "Vad är multikolinjäritet?", a: "När förklaringsvariablerna (X-variablerna) är starkt korrelerade med varandra." },
+  { cat: "Multikolinjäritet", q: "Vad händer med koefficienterna vid multikolinjäritet?", a: "De blir instabila och svårtolkade. Standardfelen ökar → t-tester tappar styrka." },
+  { cat: "Multikolinjäritet", q: "Vad är VIF och hur tolkar man det?", a: "VIF = 1/(1−R²_j)\nVIF 1 = inget problem, VIF > 10 = allvarligt problem. VIF > 5–10 signalerar hög kolinjäritet.", formula: true },
+  { cat: "Multikolinjäritet", q: "Hur åtgärdar man multikolinjäritet?", a: "Ta bort en av de korrelerade variablerna, kombinera dem till ett index, eller samla in mer data." },
+
+  // ── MODELLANTAGANDEN ──────────────────────────────────────────────────────
+  { cat: "Modellantaganden", q: "Vilka är de fyra antagandena för OLS-regression?", a: "1. Noll medelvärde: E(eᵢ) = 0\n2. Konstant varians (homoskedasticitet)\n3. Oberoende residualer (ingen autokorrelation)\n4. Normalfördelade residualer" },
+  { cat: "Modellantaganden", q: "Vad är heteroskedasticitet?", a: "Residualernas varians är inte konstant – spridningen ökar (eller minskar) med X. I residualplot syns det som en trattform." },
+  { cat: "Modellantaganden", q: "Vad är autokorrelation?", a: "Residualerna korrelerar med varandra över tid. Vanligt vid tidsseriedata. Syns som ett mönster i residualerna mot tid." },
+  { cat: "Modellantaganden", q: "Hur kontrollerar man om residualerna är normalfördelade?", a: "Rita ett histogram (ska se klockformat ut) eller ett PP-diagram (punkter längs diagonalen = OK)." },
+  { cat: "Modellantaganden", q: "Vad är skillnaden mellan linjär och kurvilinjär regressionsmodell?", a: "Linjär: Y = b₀ + b₁X (rakt samband)\nKurvilinjär: Y = b₀ + b₁X + b₂X² (böjt samband – man lägger till X² som variabel)" },
+
+  // ── URVALSUNDERSÖKNING ────────────────────────────────────────────────────
+  { cat: "Urvalsundersökning", q: "Vad är skillnaden mellan stratifierat och klusterurval?", a: "Stratifierat: populationen delas i homogena grupper, urval tas FRÅN varje grupp.\nKluster: populationen delas i heterogena grupper, hela KLUSTER väljs ut." },
+  { cat: "Urvalsundersökning", q: "Formel för estimat av populationsmedelvärde vid stratifierat urval?", a: "x̄_st = Σ (Nᵢ/N) · x̄ᵢ\nViktat genomsnitt av stratamedelvärden, viktat med stratas relativa storlek.", formula: true },
+  { cat: "Urvalsundersökning", q: "Formel för standardfel vid stratifierat urval (medelvärde)?", a: "s_{x̄_st} = √[ (1/N²) · Σ Nᵢ(Nᵢ−nᵢ) · sᵢ²/nᵢ ]", formula: true },
+  { cat: "Urvalsundersökning", q: "Vad är ändlig populationskorrektion (FPC)?", a: "Faktorn (N−n)/N i variansformeln. Minskar felmarginalen när vi mäter en stor andel av populationen (n/N är stort)." },
+  { cat: "Urvalsundersökning", q: "Formel för 95% konfidensintervall för medelvärdet?", a: "x̄ ± 2 · s_{x̄}\nDär s_{x̄} = standardfelet för stickprovsmedelvärdet.", formula: true },
+
+  // ── TIDSSERIER ────────────────────────────────────────────────────────────
+  { cat: "Tidsserier", q: "Vilka fyra komponenter ingår i en tidsserie?", a: "T – Trend (långsiktig riktning)\nC – Cyklisk (konjunkturvågor)\nS – Säsong (återkommande årsmönster)\nI – Oregelbunden (slump)" },
+  { cat: "Tidsserier", q: "Vad är MSE och hur tolkas det?", a: "MSE = Σ(Yₜ−Fₜ)²/n\nMedelvärde av kvadrerade prognosfel. Lägre MSE = bättre prognos. Straffar stora fel hårdare än MAD.", formula: true },
+  { cat: "Tidsserier", q: "Formel för exponentiell utjämning?", a: "F_{t+1} = α·Yₜ + (1−α)·Fₜ\nDär α = glättningskonstant (0 < α < 1)", formula: true },
+  { cat: "Tidsserier", q: "Vad innebär en hög α (nära 1) vid exponentiell utjämning?", a: "Prognosen reagerar snabbt på nya data. Kurvan följer datan tätt men är mer ryckig." },
+  { cat: "Tidsserier", q: "Vad innebär en låg α (nära 0) vid exponentiell utjämning?", a: "Prognosen jämnar ut kraftigt. Kurvan är mjuk men trög – reagerar långsamt på förändringar." },
+  { cat: "Tidsserier", q: "Hur väljer man bästa α?", a: "Testa olika α-värden och välj det som ger lägst MSE." },
+
+  // ── INDEX ─────────────────────────────────────────────────────────────────
+  { cat: "Index", q: "Formel för enkelt prisindex?", a: "Indexvärde(t) = 100 × (Faktiskt värde år t) / (Värde basår)\nBasåret har alltid index = 100.", formula: true },
+  { cat: "Index", q: "Vad är Laspeyres-index?", a: "Viktat aggregerat prisindex där kvantitetsvikterna är hämtade från BASÅRET.\nIₜ = 100 × (ΣQᵢ₀·Pᵢₜ) / (ΣQᵢ₀·Pᵢ₀)" },
+  { cat: "Index", q: "Vad är Paasche-index?", a: "Viktat aggregerat prisindex där kvantitetsvikterna är hämtade från AKTUELL PERIOD.\nIₜ = 100 × (ΣQᵢₜ·Pᵢₜ) / (ΣQᵢₜ·Pᵢ₀)" },
+  { cat: "Index", q: "Vad är skillnaden mellan KPI och KPIF?", a: "KPI: inkluderar effekter av ändrade bolåneräntor.\nKPIF: håller bolåneräntor konstanta. KPIF är Riksbankens mål för penningpolitiken." },
+  { cat: "Index", q: "Hur beräknar man prisförändring mellan två perioder som inte är basåret?", a: "100 × (Index_t₂ / Index_t₁)\nEx: 100 × (101.7/139.6) = 72.9 → priset sjunkit med 27.1%", formula: true },
+
+  // ── ICKE-PARAMETRISKT ─────────────────────────────────────────────────────
+  { cat: "Icke-parametriskt", q: "När ska man använda icke-parametriska test?", a: "När data inte är normalfördelad, vid litet stickprov, eller när man bara har ordinalskaledata (rankningar)." },
+  { cat: "Icke-parametriskt", q: "Vad testar teckentestet?", a: "Om medianen är ett visst värde m₀. Man räknar plustecken (obs > m₀) och minustecken (obs < m₀)." },
+  { cat: "Icke-parametriskt", q: "Formel för teckentestet vid stort stickprov (n > 20)?", a: "z = (S − n/2) / √(n/4)\nDär S = antal plustecken. Obs: om obs = m₀ exkluderas den.", formula: true },
+  { cat: "Icke-parametriskt", q: "Vad är Wilcoxons teckenrangtest?", a: "Icke-parametriskt test för beroende stickprov. Mer kraftfullt än teckentest – tar hänsyn till storleken på skillnaderna, inte bara tecknet." },
+  { cat: "Icke-parametriskt", q: "Hur beräknas σ_T i Wilcoxons test (stort n)?", a: "σ_T = √[ n(n+1)(2n+1) / 6 ]\nZ = T / σ_T", formula: true },
+  { cat: "Icke-parametriskt", q: "Formel för Spearmans rangkorrelation?", a: "r_s = 1 − (6·Σdᵢ²) / (n(n²−1))\nDär dᵢ = skillnad i rang för observation i.", formula: true },
+  { cat: "Icke-parametriskt", q: "Vad är skillnaden mellan Pearson och Spearman?", a: "Pearson mäter linjärt samband (kräver intervalldata).\nSpearman mäter monotont samband (OK med ordinaldata, robust mot extremvärden)." },
+];
+
+// ── State ──────────────────────────────────────────────────
+let cards = [...ALL_CARDS];
+let currentIndex = 0;
+let isFlipped = false;
+let known = new Set();
+let needsWork = new Set();
+let activeCategory = 'Alla';
+
+// Build category filter buttons
+const categories = ['Alla', ...new Set(ALL_CARDS.map(c => c.cat))];
+const filtersEl = document.getElementById('categoryFilters');
+categories.forEach(cat => {
+  const btn = document.createElement('button');
+  btn.textContent = cat;
+  btn.className = cat === 'Alla' ? 'active' : '';
+  btn.onclick = () => setCategory(cat);
+  filtersEl.appendChild(btn);
+});
+
+function setCategory(cat) {
+  activeCategory = cat;
+  document.querySelectorAll('.filters button').forEach(b => {
+    b.classList.toggle('active', b.textContent === cat);
+  });
+  cards = cat === 'Alla' ? [...ALL_CARDS] : ALL_CARDS.filter(c => c.cat === cat);
+  known = new Set(); needsWork = new Set();
+  currentIndex = 0;
+  updateScoreboard();
+  showCard();
+  document.getElementById('finishScreen').classList.remove('show');
+  document.getElementById('controls').style.display = 'flex';
+  document.getElementById('cardScene').style.display = 'block';
+  document.getElementById('progressSection') && (document.getElementById('progressSection').style.display = '');
+}
+
+function showCard() {
+  if (currentIndex >= cards.length) {
+    showFinish();
+    return;
+  }
+  const card = cards[currentIndex];
+  document.getElementById('cardCategory').textContent = card.cat;
+  document.getElementById('cardCategoryBack').textContent = card.cat;
+  document.getElementById('cardQuestion').textContent = card.q;
+
+  const ansEl = document.getElementById('cardAnswer');
+  if (card.formula) {
+    const lines = card.a.split('\n');
+    ansEl.innerHTML = `<div class="answer-wrap">${lines.map((l, i) =>
+      i === 0 ? `<span>${l}</span><span class="formula-text">${lines[1] || ''}</span>` : ''
+    ).filter((_,i) => i === 0).join('')}</div>`;
+    // Simpler: just show first line + formula
+    ansEl.innerHTML = `<div class="answer-wrap"><span>${lines[0]}</span>${lines[1] ? `<span class="formula-text">${lines[1]}</span>` : ''}</div>`;
+  } else {
+    ansEl.innerHTML = `<div class="answer-wrap">${card.a.replace(/\n/g, '<br>')}</div>`;
+  }
+
+  // Reset flip
+  isFlipped = false;
+  document.getElementById('cardScene').classList.remove('flipped');
+  updateProgress();
+}
+
+function flipCard() {
+  isFlipped = !isFlipped;
+  document.getElementById('cardScene').classList.toggle('flipped', isFlipped);
+}
+
+function markCard(didKnow) {
+  if (didKnow) {
+    known.add(currentIndex);
+    needsWork.delete(currentIndex);
+  } else {
+    needsWork.add(currentIndex);
+    known.delete(currentIndex);
+  }
+  updateScoreboard();
+  nextCard();
+}
+
+function nextCard() {
+  if (currentIndex < cards.length - 1) {
+    currentIndex++;
+    showCard();
+  } else {
+    showFinish();
+  }
+}
+
+function prevCard() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    showCard();
+  }
+}
+
+function shuffleCards() {
+  for (let i = cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cards[i], cards[j]] = [cards[j], cards[i]];
+  }
+  known = new Set(); needsWork = new Set();
+  currentIndex = 0;
+  updateScoreboard();
+  showCard();
+  document.getElementById('finishScreen').classList.remove('show');
+  document.getElementById('controls').style.display = 'flex';
+  document.getElementById('cardScene').style.display = 'block';
+}
+
+function updateProgress() {
+  const total = cards.length;
+  const done = known.size + needsWork.size;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progressText').textContent = `Kort ${currentIndex + 1} av ${total}`;
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('cardCounter').textContent = `${currentIndex + 1} / ${total}`;
+}
+
+function updateScoreboard() {
+  document.getElementById('scoreGreen').textContent = known.size + ' kan';
+  document.getElementById('scoreRed').textContent = needsWork.size + ' övar';
+}
+
+function showFinish() {
+  document.getElementById('cardScene').style.display = 'none';
+  document.getElementById('controls').style.display = 'none';
+  const fs = document.getElementById('finishScreen');
+  fs.classList.add('show');
+
+  const total = cards.length;
+  const knownN = known.size;
+  const weakN = needsWork.size;
+  const knownPct = total > 0 ? Math.round((knownN / total) * 100) : 0;
+  const weakPct = total > 0 ? Math.round((weakN / total) * 100) : 0;
+
+  document.getElementById('barGreen').style.width = knownPct + '%';
+  document.getElementById('barRed').style.width = weakPct + '%';
+  document.getElementById('pctGreen').textContent = knownPct + '%';
+  document.getElementById('pctRed').textContent = weakPct + '%';
+
+  let emoji = '🎉', title = 'Fantastiskt!', msg = '';
+  if (knownPct >= 80) { emoji = '🏆'; title = 'Imponerande!'; msg = `Du kan ${knownPct}% av korten – du är redo för tentan!`; }
+  else if (knownPct >= 60) { emoji = '💪'; title = 'Bra jobbat!'; msg = `Du kan ${knownPct}% – lite mer repetition och du är där!`; }
+  else if (knownPct >= 40) { emoji = '📚'; title = 'På rätt väg!'; msg = `Du kan ${knownPct}% – öva på de svaga korten!`; }
+  else { emoji = '🌱'; title = 'Kör på!'; msg = `Du kan ${knownPct}% – kör en runda till, det sitter snart!`; }
+
+  document.getElementById('finishEmoji').textContent = emoji;
+  document.getElementById('finishTitle').textContent = title;
+  document.getElementById('finishMsg').textContent = msg;
+
+  const btnReview = document.getElementById('btnReview');
+  btnReview.style.display = weakN > 0 ? 'block' : 'none';
+}
+
+function restartAll() {
+  cards = activeCategory === 'Alla' ? [...ALL_CARDS] : ALL_CARDS.filter(c => c.cat === activeCategory);
+  known = new Set(); needsWork = new Set();
+  currentIndex = 0;
+  updateScoreboard();
+  document.getElementById('finishScreen').classList.remove('show');
+  document.getElementById('controls').style.display = 'flex';
+  document.getElementById('cardScene').style.display = 'block';
+  showCard();
+}
+
+function reviewWeak() {
+  // Build a deck of only the cards that were marked "needs work"
+  const weakCards = [];
+  needsWork.forEach(idx => weakCards.push(cards[idx]));
+  if (weakCards.length === 0) return;
+  cards = weakCards;
+  known = new Set(); needsWork = new Set();
+  currentIndex = 0;
+  updateScoreboard();
+  document.getElementById('finishScreen').classList.remove('show');
+  document.getElementById('controls').style.display = 'flex';
+  document.getElementById('cardScene').style.display = 'block';
+  showCard();
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
+  if (e.key === 'ArrowRight') nextCard();
+  if (e.key === 'ArrowLeft')  prevCard();
+  if (e.key === 'y' || e.key === 'Y') markCard(true);
+  if (e.key === 'n' || e.key === 'N') markCard(false);
+});
+
+// Init
+showCard();
+</script>
+</body>
+</html>
